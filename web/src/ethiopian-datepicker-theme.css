@@ -1,0 +1,93 @@
+/**
+ * Ethiopian datepicker — brand green theme (loaded after library CSS in angular.json).
+ */
+
+html.locale-am .ethio-datepicker {
+  font-family: 'Noto Sans Ethiopic', system-ui, sans-serif;
+}
+
+.ethio-datepicker {
+  --primary: #059669 !important;
+  --primary-dark: #047857 !important;
+  --primary-light: #34d399 !important;
+  --ethio-green: #059669 !important;
+  --selected-bg: #059669 !important;
+}
+
+.ethio-datepicker-header::after {
+  background: linear-gradient(90deg, #059669 0%, #047857 100%) !important;
+}
+
+.ethio-datepicker .ethio-day.selected,
+.ethio-datepicker .ethio-day.selected:hover {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  border-color: #047857 !important;
+  color: #fff !important;
+}
+
+.ethio-datepicker .ethio-day.today:not(.selected) {
+  border-color: #059669 !important;
+  color: #059669 !important;
+  font-weight: 700;
+}
+
+.ethio-datepicker .ethio-day:not(.empty):not(.disabled):not(.selected):hover {
+  border-color: #34d399 !important;
+}
+
+.ethio-datepicker .ethio-nav-btn:hover {
+  border-color: #059669 !important;
+  color: #059669 !important;
+}
+
+.ethio-datepicker .ethio-lang-toggle:hover {
+  background: #059669 !important;
+  border-color: #059669 !important;
+  color: #fff !important;
+}
+
+.ethio-datepicker .ethio-today-btn {
+  background: #059669 !important;
+  border-color: #059669 !important;
+  color: #fff !important;
+}
+
+.ethio-datepicker .ethio-today-btn:hover {
+  background: #047857 !important;
+  border-color: #047857 !important;
+}
+
+.ethio-datepicker .ethio-year-cell.selected,
+.ethio-datepicker .ethio-month-cell.selected {
+  background: #059669 !important;
+  border-color: #047857 !important;
+  color: #fff !important;
+}
+
+.ethio-datepicker .ethio-year-cell:hover,
+.ethio-datepicker .ethio-month-cell:hover {
+  border-color: #059669 !important;
+  color: #059669 !important;
+}
+
+.ethio-datepicker .ethio-day.holiday:not(.selected) {
+  background: #ecfdf5 !important;
+  color: #065f46 !important;
+  border-color: #a7f3d0 !important;
+}
+
+.ethio-datepicker .ethio-day.holiday:not(.selected):hover {
+  box-shadow: 0 0 0 2px #34d399 !important;
+}
+
+.ethio-datepicker .ethio-day.holiday.selected {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #fff !important;
+}
+
+.ethio-datepicker .ethio-day:focus,
+.ethio-datepicker .ethio-nav-btn:focus,
+.ethio-datepicker .ethio-lang-toggle:focus,
+.ethio-datepicker .ethio-today-btn:focus {
+  outline-color: #059669 !important;
+}

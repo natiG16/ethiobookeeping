@@ -1,0 +1,52 @@
+# Dependencies
+node_modules/
+.pnp/
+
+# Build
+target/
+.next/
+dist/
+build/
+web/.angular/
+web/dist/
+*.class
+
+# Env
+.env
+.env.local
+.env.*.local
+web/public/app-config.json
+
+# Angular cache
+.angular/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Expo
+.expo/
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# Mobile app (not used in this repo currently)
+mobile/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Docker volumes
+postgres_data/
+
+# User-uploaded images (local dev)
+uploads/
+backend/uploads/

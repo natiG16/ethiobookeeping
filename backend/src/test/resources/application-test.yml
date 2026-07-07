@@ -1,0 +1,24 @@
+# Test profile — requires PostgreSQL (docker compose up -d postgres)
+spring:
+  config:
+    import: []
+  datasource:
+    url: jdbc:postgresql://localhost:5432/ethiobooks
+    username: ethiobooks
+    password: ethiobooks
+  flyway:
+    enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: validate
+
+app:
+  mail:
+    frontend-url: http://localhost:4200
+  admin:
+    email: admin@test.local
+    password: test-admin-password
+  jwt:
+    secret: test-jwt-secret-at-least-256-bits-long-for-hs256-signing-key-xx
+  otp:
+    secret: test-otp-secret
