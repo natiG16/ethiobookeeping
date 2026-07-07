@@ -64,7 +64,7 @@ services:
     depends_on:
       - api
     expose:
-      - "80"
+      - "8081:80"
     networks:
       - dokploy-network
 
