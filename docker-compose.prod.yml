@@ -11,9 +11,9 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-}
       UPLOAD_DIR: /data/uploads
-      DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-ethiobooks}
-      DB_USERNAME: ${POSTGRES_USER:-ethiobooks}
-      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_URL: ${DB_URL}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGINS: ${CORS_ORIGINS}
       FRONTEND_URL: ${FRONTEND_URL}
