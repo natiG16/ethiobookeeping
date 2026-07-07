@@ -12,64 +12,9 @@
 
 ---
 
-## Release readiness checklist
+## Simple deployment (recommended)
 
-Run before every production deploy.
-
-### Automated tests (required)
-
-**Requirements:** Docker Desktop running (PostgreSQL for backend integration tests).
-
-```powershell
-cd d:\bookeeping
-.\scripts\run-tests.ps1
-```
-
-This runs, in order:
-
-1. `docker compose up -d postgres` (waits for healthy DB)
-2. `mvn test` (backend integration + unit tests)
-3. `npm run test:ci` (frontend Karma/Jasmine, headless Chrome)
-4. `npm run build:prod` (production Angular build)
-
-**Manual equivalent:**
-
-```powershell
-cd d:\bookeeping\backend
-mvn test
-mvn package -DskipTests   # optional: verify JAR packages
-
-cd ..\web
-npm ci
-npm run test:ci
-npm run build:prod
-```
-
-**CI (GitHub Actions):** `.github/workflows/ci.yml` runs the same backend + frontend test/build on `main` / PRs.
-
-| Check | Command | Expected |
-|-------|---------|----------|
-| Backend tests | `mvn test` | BUILD SUCCESS, Flyway validates 15 migrations |
-| Frontend tests | `npm run test:ci` | All specs pass |
-| Prod build | `npm run build:prod` | Output in `web/dist/web` (budget warning OK) |
-| API package | `mvn package -DskipTests` | JAR in `backend/target/` |
-
-### Smoke test (running stack)
-
-After `docker compose up -d --build` (or VPS deploy):
-
-```powershell
-.\scripts\smoke-test.ps1 -BaseUrl http://localhost:4200
-```
-
-On Linux VPS:
-
-```bash
-chmod +x scripts/smoke-test.sh
-./scripts/smoke-test.sh https://yourdomain.com
-```
-
-Verifies: SPA loads, `GET /api/health` returns `UP`, static assets served.
+For now, use the short guide in **`DEPLOYMENT-HOSTINGER-KVM.md`** (Docker Compose on a single VPS).
 
 ---
 
@@ -189,9 +134,9 @@ docker compose up -d --build
 cp .env.example .env
 nano .env   # JWT_SECRET, POSTGRES_PASSWORD, CORS_ORIGINS, FRONTEND_URL, mail, Google, admin
 
-chmod +x scripts/deploy-hostinger.sh scripts/smoke-test.sh
-./scripts/deploy-hostinger.sh
-./scripts/smoke-test.sh https://yourdomain.com
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+curl -fsS http://localhost/api/health
 ```
 
 Production compose closes public ports on Postgres/API and serves the app on port **80**:
@@ -211,7 +156,7 @@ Put **HTTPS** in front with Hostinger’s panel, **Caddy**, or **Certbot** (Let�
 
 ### Strategy B — AWS (recommended for cloud)
 
-Full step-by-step: **[DEPLOYMENT-AWS.md](DEPLOYMENT-AWS.md)**
+Use the same Docker Compose approach on any VPS. (AWS-specific guide removed.)
 
 | Component | AWS service |
 |-----------|-------------|
@@ -223,7 +168,7 @@ Full step-by-step: **[DEPLOYMENT-AWS.md](DEPLOYMENT-AWS.md)**
 | Email | Amazon SES |
 | DNS | Route 53 |
 
-**Fast path:** EC2 + Docker Compose + RDS (same as VPS, see DEPLOYMENT-AWS.md).
+**Fast path:** Any VPS/VM using Docker Compose (same steps as Hostinger KVM).
 
 ### Strategy C — Split hosting (other clouds)
 

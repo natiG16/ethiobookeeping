@@ -351,8 +351,36 @@ function minAmountValidator(control: AbstractControl): ValidationErrors | null {
       } @else {
         <div class="txn-list-panel">
           <div class="txn-list-panel-head">
-            <h3 class="txn-list-panel-title">{{ locale.t('transactions.resultsTitle') }}</h3>
-            <span class="text-xs text-slate-500">{{ totalElements() }} {{ locale.t('transactions.records') }}</span>
+            <div class="flex items-center gap-2">
+              <h3 class="txn-list-panel-title">{{ locale.t('transactions.resultsTitle') }}</h3>
+              <label class="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+                <input
+                  type="checkbox"
+                  class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+                  [checked]="allSelectedOnPage()"
+                  [disabled]="items().length === 0"
+                  (click)="$event.stopPropagation()"
+                  (change)="selectAllOnPage($any($event.target).checked)"
+                />
+                <span class="hidden sm:inline">Select all</span>
+              </label>
+              @if (selectedCount() > 0) {
+                <span class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-medium text-slate-600">
+                  {{ selectedCount() }} selected
+                </span>
+              }
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs text-slate-500">{{ totalElements() }} {{ locale.t('transactions.records') }}</span>
+              <button
+                type="button"
+                class="btn-danger btn-xs"
+                [disabled]="!planFeatures.canWrite() || selectedCount() === 0"
+                (click)="bulkDelete()"
+              >
+                {{ locale.t('common.delete') }}
+              </button>
+            </div>
           </div>
           <div class="txn-list-panel-body">
             @for (tx of items(); track tx.id) {
@@ -377,6 +405,15 @@ function minAmountValidator(control: AbstractControl): ValidationErrors | null {
 
       <ng-template #txnRow let-tx>
         <div class="list-row group">
+          <label class="mr-3 flex items-center">
+            <input
+              type="checkbox"
+              class="h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500"
+              [checked]="isSelected(tx.id)"
+              (click)="$event.stopPropagation()"
+              (change)="toggleSelection(tx.id, $any($event.target).checked)"
+            />
+          </label>
           <a
             [routerLink]="['/app/transactions', tx.id]"
             class="flex min-w-0 flex-1 items-center gap-3 rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
@@ -637,6 +674,8 @@ export class TransactionsComponent implements OnInit {
   businessId = '';
   private searchDebounce?: ReturnType<typeof setTimeout>;
 
+  readonly selectedIds = signal<Set<string>>(new Set());
+
   form = this.fb.group({
     amount: ['', [Validators.required, minAmountValidator]],
     description: [''],
@@ -878,6 +917,30 @@ export class TransactionsComponent implements OnInit {
 
   }
 
+  isSelected(id: string): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  selectedCount(): number {
+    return this.selectedIds().size;
+  }
+
+  toggleSelection(id: string, checked: boolean) {
+    this.selectedIds.update((set) => {
+      const next = new Set(set);
+      if (checked) {
+        next.add(id);
+      } else {
+        next.delete(id);
+      }
+      return next;
+    });
+  }
+
+  private clearSelection() {
+    this.selectedIds.set(new Set());
+  }
+
   onSortChange(value: TransactionSortKey) {
     this.sortBy.set(value);
     this.page.set(0);
@@ -887,7 +950,7 @@ export class TransactionsComponent implements OnInit {
 
 
   load() {
-
+    this.clearSelection();
     this.loading.set(true);
 
     this.error.set('');
@@ -1197,6 +1260,76 @@ export class TransactionsComponent implements OnInit {
 
       });
 
+  }
+
+  allSelectedOnPage(): boolean {
+    const pageIds = this.items().map((t) => t.id);
+    if (pageIds.length === 0) return false;
+    const selected = this.selectedIds();
+    return pageIds.every((id) => selected.has(id));
+  }
+
+  selectAllOnPage(checked: boolean) {
+    const pageIds = this.items().map((t) => t.id);
+    this.selectedIds.update((set) => {
+      const next = new Set(set);
+      for (const id of pageIds) {
+        if (checked) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }
+
+  async bulkDelete() {
+    if (!this.planFeatures.canWrite()) {
+      this.error.set(this.locale.t('feature.locked.write'));
+      return;
+    }
+    if (!this.businessId) return;
+    const ids = Array.from(this.selectedIds());
+    if (ids.length === 0) return;
+
+    const confirmed = await this.confirmDialog.confirm({
+      title: this.locale.t('confirm.deleteTitle'),
+      message: `${this.locale.t('confirm.deleteMessage')} (${ids.length} items)`,
+      confirmLabel: this.locale.t('confirm.delete'),
+      cancelLabel: this.locale.t('common.cancel'),
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    this.loading.set(true);
+    let lastError: string | null = null;
+
+    for (const id of ids) {
+      await new Promise<void>((resolve) => {
+        this.http
+          .delete(`${environment.apiUrl}/businesses/${this.businessId}/transactions/${id}`)
+          .subscribe({
+            next: () => resolve(),
+            error: (e) => {
+              lastError = apiErrorMessage(e, 'Failed to delete');
+              resolve();
+            },
+          });
+      });
+    }
+
+    this.clearSelection();
+    this.loading.set(false);
+
+    if (lastError) {
+      this.error.set(lastError);
+      this.toast.error(lastError);
+    } else {
+      this.toast.success(this.locale.t('toast.saved'));
+    }
+
+    if (this.items().length === ids.length && this.page() > 0) {
+      this.page.update((p) => p - 1);
+    }
+    this.load();
   }
 
 }

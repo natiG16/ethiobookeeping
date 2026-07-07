@@ -74,17 +74,9 @@ Restart the API after changing `.env`.
 - English / Amharic via API localization
 - JWT auth + Google ID token ready
 
-## Tests & deployment
+## Deployment (simple)
 
-```powershell
-# Full test suite (Postgres + backend + frontend)
-.\scripts\run-tests.ps1
-
-# After docker compose up --build
-.\scripts\smoke-test.ps1 -BaseUrl http://localhost:4200
-```
-
-See **[DEPLOYMENT.md](DEPLOYMENT.md)** for production checklist, VPS deploy (`scripts/deploy-hostinger.sh`), manual QA (inventory, batch sales, transactions), and rollback.
+See **`DEPLOYMENT-HOSTINGER-KVM.md`** for a short Hostinger KVM VPS deployment guide (Docker Compose).
 
 ## Docker (full stack)
 
